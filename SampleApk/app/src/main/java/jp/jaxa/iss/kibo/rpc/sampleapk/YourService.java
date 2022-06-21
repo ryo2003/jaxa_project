@@ -11,7 +11,7 @@ import gov.nasa.arc.astrobee.types.Quaternion;
 import org.opencv.core.Mat;
 
 /**
- * Class meant to handle commands from the Ground Data System and execute them in Astrobee .
+ * Class meant to handle commands from the Ground Data System and execute them in Astrobee.
  */
 
 public class YourService extends KiboRpcService {
@@ -28,38 +28,20 @@ public class YourService extends KiboRpcService {
 
         // move to a point
         Point point1 = new Point(10.71000f, -7.70000f, 4.48000f);
+        Point stoppingPoint1 = new Point(11.00000f, -8.40000f, 4.84847f);
+        Point point2 = new Point(11.27460f, -9.92284f, 5.29881f);
         Quaternion quaternion1 = new Quaternion(0f, 0.707f, 0f, 0.707f);
+        Quaternion quaternion2 = new Quaternion(0f, 0f, -0.707f, 0.707f);
 
-        Result result;
-        final int LOOP_MAX = 5;
-        
-        // move to point 1(first try)
-        result = api.moveTo(point1, quaternion1, true);
-
-        // check result and loop while moveTo api is not succeeded.
-        // Do NOT write infinite loop.
-        int loopCounter = 0;
-
-        while(!result.hasSucceeded() && loopCounter < LOOP_MAX){
-        // retry
-            result = api.moveTo(point1, quaternion1, true);
-            ++loopCounter;
-        }
-
+        moveTo(point1, quaternion1);
         // report point1 arrival
         api.reportPoint1Arrival();
+        laserIrradiation();
 
-        // get a camera image
-        Mat image = api.getMatNavCam();
+        moveTo(stoppingPoint1, quaternion2);
 
-        // irradiate the laser
-        api.laserControl(true);
-
-        // take target1 snapshots
-        api.takeTarget1Snapshot();
-
-        // turn the laser off
-        api.laserControl(false);
+        moveTo(point2, quaternion2);
+        laserIrradiation();
 
         /* ******************************************** */
         /* write your own code and repair the air leak! */
@@ -86,14 +68,14 @@ public class YourService extends KiboRpcService {
 
         final Point point = new Point(pos_x, pos_y, pos_z);
         final Quaternion quaternion = new Quaternion((float)qua_x, (float)qua_y,
-                                                     (float)qua_z, (float)qua_w);
+                (float)qua_z, (float)qua_w);
 
         api.moveTo(point, quaternion, true);
     }
 
     private void relativeMoveToWrapper(double pos_x, double pos_y, double pos_z,
-                               double qua_x, double qua_y, double qua_z,
-                               double qua_w) {
+                                       double qua_x, double qua_y, double qua_z,
+                                       double qua_w) {
 
         final Point point = new Point(pos_x, pos_y, pos_z);
         final Quaternion quaternion = new Quaternion((float) qua_x, (float) qua_y,
@@ -102,5 +84,39 @@ public class YourService extends KiboRpcService {
         api.relativeMoveTo(point, quaternion, true);
     }
 
-}
+    private void moveTo(Point point1, Quaternion quaternion1) {
+        Result result;
+        final int LOOP_MAX = 5;
 
+        // move to point 1(first try)
+        result = api.moveTo(point1, quaternion1, true);
+
+        // check result and loop while moveTo api is not succeeded.
+        // Do NOT write infinite loop.
+        int loopCounter = 0;
+
+        while (!result.hasSucceeded() && loopCounter < LOOP_MAX) {
+            // retry
+            result = api.moveTo(point1, quaternion1, true);
+            ++loopCounter;
+        }
+
+    }
+
+
+    private void laserIrradiation(){
+
+        // get a camera image
+        Mat image = api.getMatNavCam();
+
+        // irradiate the laser
+        api.laserControl(true);
+
+        // take target1 snapshots
+        api.takeTarget1Snapshot();
+
+        // turn the laser off
+        api.laserControl(false);
+    }
+
+}
