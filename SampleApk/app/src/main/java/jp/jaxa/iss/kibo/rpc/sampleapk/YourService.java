@@ -11,7 +11,7 @@ import gov.nasa.arc.astrobee.types.Quaternion;
 import org.opencv.core.Mat;
 
 /**
- * Class meant to handle commands from the Ground Data System and execute them in Astrobee
+ * Class meant to handle commands from the Ground Data System and execute them in Astrobee .
  */
 
 public class YourService extends KiboRpcService {
